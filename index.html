@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>JOURNEY - Live Train Running Status & Platform Updates</title>
+
+    <!-- Sync Welcome & Theme Check -->
+    <script>
+        (function () {
+            const welcomeDone = localStorage.getItem('journeyWelcomeCompleted');
+            if (welcomeDone === 'true') {
+                document.documentElement.classList.add('hide-welcome-initially');
+            }
+
+            const theme = localStorage.getItem('journeyTheme') || 'light';
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8e1b29",
+                        "primary-hover": "#771420",
+                        "primary-dark": "#5a121a",
+                        "surface": "#ffffff",
+                        "surface-dim": "#f8fafc",
+                        "on-surface": "#0f172a",
+                        "outline": "#e2e8f0",
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"],
+                        mono: ["JetBrains Mono", "monospace"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body
+    class="bg-[#f4f5f7] dark:bg-[#0f131a] font-sans text-sm text-[#0f172a] dark:text-[#f8fafc] antialiased min-h-screen relative">
+
+    <!-- HOW IT WORKS / PROCESS GUIDE MODAL -->
+    <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all duration-300"
+        id="welcome-overlay">
+        <div
+            class="bg-white dark:bg-[#181e29] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 w-full max-w-xl p-6 sm:p-8 mx-4 flex flex-col items-center text-center relative max-h-[90vh] overflow-y-auto">
+            <!-- Top Right Close Button -->
+            <button id="closeWelcomeModal"
+                class="absolute top-4 right-4 p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                title="Close guide">
+                <span class="material-symbols-outlined text-xl">close</span>
+            </button>
+
+            <!-- Brand Logo & Header -->
+            <div class="w-16 h-16 mb-2 flex items-center justify-center welcome-logo-container">
+                <img src="logo.png" alt="Journey Logo" class="w-full h-full object-contain">
+            </div>
+            <span
+                class="inline-block px-3 py-1 bg-red-50 dark:bg-red-950/40 text-[#8e1b29] dark:text-red-300 border border-red-200 dark:border-red-900 text-xs font-semibold rounded-full mb-2"
+                data-i18n="dispatch_label">
+                Live Railway Tracker
+            </span>
+            <h2 class="text-xl sm:text-2xl font-bold tracking-tight mb-1 text-[#0f172a] dark:text-white"
+                data-i18n="how_works_title">
+                How Journey App Works
+            </h2>
+            <p class="text-xs sm:text-sm text-[#64748b] dark:text-gray-400 leading-relaxed max-w-md mb-4"
+                data-i18n="how_works_sub">
+                Live GPS tracking, platform updates & delay forecasts in 4 easy steps
+            </p>
+
+            <!-- 4-Step Process Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full my-2 text-left">
+                <!-- Step 1 -->
+                <div
+                    class="p-3 bg-red-50/60 dark:bg-red-950/30 border border-red-100 dark:border-red-900/50 rounded-xl flex items-start gap-3">
+                    <div
+                        class="w-8 h-8 rounded-lg bg-[#8e1b29] text-white flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+                        <span class="material-symbols-outlined text-[18px]">search</span>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-[#0f172a] dark:text-white" data-i18n="step1_title">1. Search
+                            Any Train</h4>
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-snug mt-0.5"
+                            data-i18n="step1_desc">
+                            Enter a 5-digit train number (e.g. 12841) or name to find instant live details.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div
+                    class="p-3 bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 rounded-xl flex items-start gap-3">
+                    <div
+                        class="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+                        <span class="material-symbols-outlined text-[18px]">radar</span>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-[#0f172a] dark:text-white" data-i18n="step2_title">2. Live
+                            Satellite Radar</h4>
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-snug mt-0.5"
+                            data-i18n="step2_desc">
+                            View real-time train movement, cruising speed, and track signal clearance.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div
+                    class="p-3 bg-amber-50/60 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/50 rounded-xl flex items-start gap-3">
+                    <div
+                        class="w-8 h-8 rounded-lg bg-amber-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+                        <span class="material-symbols-outlined text-[18px]">schedule</span>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-[#0f172a] dark:text-white" data-i18n="step3_title">3.
+                            Timetable & Platforms</h4>
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-snug mt-0.5"
+                            data-i18n="step3_desc">
+                            See expected station arrival times, platform numbers, and live delay forecasts.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div
+                    class="p-3 bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 rounded-xl flex items-start gap-3">
+                    <div
+                        class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+                        <span class="material-symbols-outlined text-[18px]">alt_route</span>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-[#0f172a] dark:text-white" data-i18n="step4_title">4. Station
+                            Routes</h4>
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-snug mt-0.5"
+                            data-i18n="step4_desc">
+                            Discover all direct trains connecting your origin and destination stations.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div
+                class="w-full flex items-center justify-between gap-3 pt-3 mt-2 border-t border-gray-100 dark:border-gray-800">
+                <button
+                    class="text-xs text-[#64748b] hover:text-[#0f172a] dark:hover:text-white font-medium py-1 transition-colors cursor-pointer"
+                    id="btn-dismiss-welcome" data-i18n="btn_dismiss">
+                    Don't show on startup
+                </button>
+                <button
+                    class="py-2.5 px-5 bg-[#8e1b29] hover:bg-[#771420] text-white font-semibold text-xs rounded-xl shadow-xs transition-all flex items-center gap-2 cursor-pointer"
+                    id="btn-start-journey">
+                    <span data-i18n="btn_got_it">Got It, Start Tracking</span>
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside
+        class="fixed left-0 top-0 h-full w-64 bg-white dark:bg-[#181e29] border-r border-gray-200 dark:border-gray-800 z-50 flex flex-col justify-between select-none shadow-xs">
+        <div class="flex flex-col">
+            <!-- Brand Header with Logo (Top Left Corner) -->
+            <div class="h-16 px-4 flex items-center gap-3 border-b border-gray-200 dark:border-gray-800">
+                <div class="w-10 h-10 shrink-0 flex items-center justify-center sidebar-logo-container">
+                    <img src="logo.png" alt="Journey Logo" class="w-full h-full object-contain">
+                </div>
+                <div class="flex flex-col leading-tight">
+                    <div class="flex items-center gap-1.5">
+                        <span
+                            class="font-extrabold text-base tracking-wider text-[#0f172a] dark:text-white uppercase">JOURNEY</span>
+                        <span
+                            class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-red-100 dark:bg-red-950 text-[#8e1b29] dark:text-red-400">LIVE</span>
+                    </div>
+                    <span class="text-[11px] text-[#64748b] dark:text-gray-400 font-medium" data-i18n="core_label">Train
+                        Running Status</span>
+                </div>
+            </div>
+
+            <!-- Navigation Section -->
+            <div class="px-5 pt-6 pb-2">
+                <div class="text-[11px] font-bold uppercase tracking-wider text-gray-400" data-i18n="nav_title">
+                    Navigation</div>
+            </div>
+            <nav class="flex flex-col px-3 gap-1" id="sidebarNav">
+                <a class="nav-link active flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm transition-colors"
+                    data-tab="spot-your-train" href="#">
+                    <span class="material-symbols-outlined text-[20px]">radar</span>
+                    <span data-i18n="nav_spot">Spot Your Train</span>
+                </a>
+                <a class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm text-[#475569] dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    data-tab="train-schedule" href="#">
+                    <span class="material-symbols-outlined text-[20px]">calendar_view_day</span>
+                    <span data-i18n="nav_schedule">Train Schedule</span>
+                </a>
+                <a class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm text-[#475569] dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    data-tab="station-search" href="#">
+                    <span class="material-symbols-outlined text-[20px]">alt_route</span>
+                    <span data-i18n="nav_station">Station to Station</span>
+                </a>
+                <a class="nav-link flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm text-[#475569] dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    data-tab="recently-viewed" href="#">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-[20px]">history</span>
+                        <span data-i18n="nav_recent">Recently Viewed</span>
+                    </div>
+                    <span
+                        class="text-[10px] font-mono px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-500 rounded-full"
+                        id="recentHistoryCount">4</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Sidebar Bottom Container with Train Photo (Bottom Left Corner) -->
+        <div
+            class="p-4 border-t border-gray-200 dark:border-gray-800 bg-[#f8fafc] dark:bg-black/20 flex flex-col gap-3">
+            <!-- Train Image Card -->
+            <div
+                class="relative w-full h-24 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 group shadow-xs">
+                <div id="sidebar-train-img-container" class="w-full h-full">
+                    <img src="train.jpg" alt="Journey Express" class="w-full h-full object-cover">
+                </div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+                <span
+                    class="absolute bottom-2 right-2 px-2 py-0.5 bg-white/20 backdrop-blur-md rounded border border-white/30 text-[9px] font-bold text-white uppercase tracking-wider">JOURNEY
+                    EXPRESS</span>
+            </div>
+
+            <!-- Passenger Info Status -->
+            <div
+                class="flex items-center justify-between p-2 bg-white dark:bg-[#121824] rounded-lg border border-gray-200 dark:border-gray-800">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-[11px] font-semibold text-gray-600 dark:text-gray-300"
+                        data-i18n="live_gps_connected">Live GPS Connected</span>
+                </div>
+                <span
+                    class="text-[10px] font-mono font-bold text-[#8e1b29] dark:text-red-400 bg-red-50 dark:bg-red-950/40 px-1.5 py-0.5 rounded"
+                    data-i18n="status_active">Active</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT WRAPPER -->
+    <div class="pl-64 flex flex-col min-h-screen">
+        <!-- TOP HEADER -->
+        <header
+            class="fixed top-0 left-64 right-0 h-16 bg-white dark:bg-[#181e29] border-b border-gray-200 dark:border-gray-800 z-40 px-6 flex items-center justify-between select-none shadow-xs transition-colors">
+            <div class="flex items-center gap-3">
+                <div
+                    class="flex items-center gap-2 px-3 py-1 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 rounded-full">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                    <span class="text-[11px] font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider"
+                        data-i18n="live_feed">LIVE UPDATES ACTIVE</span>
+                </div>
+                <div class="h-4 w-px bg-gray-200 dark:bg-gray-700 mx-1"></div>
+                <button
+                    class="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-[#121824] hover:bg-gray-100 dark:hover:bg-gray-800 text-[#0f172a] dark:text-white border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-medium transition-all cursor-pointer"
+                    id="syncButton">
+                    <span class="material-symbols-outlined text-[16px] text-[#8e1b29]" id="syncIcon">sync</span>
+                    <span data-i18n="btn_sync">Refresh</span>
+                </button>
+                <span class="font-mono text-xs text-[#64748b] dark:text-gray-400" id="lastSyncLabel">Last updated:
+                    14:28:15 IST</span>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <!-- LIVE TRAIN RADAR STATUS PILL -->
+                <button id="supabaseModalBtn"
+                    class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 rounded-lg text-xs font-semibold text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-all cursor-pointer shadow-2xs"
+                    title="Click to view live train network status">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="headerDbStatus">8,673 Trains Live</span>
+                </button>
+
+                <button
+                    class="text-xs font-medium text-gray-500 hover:text-[#8e1b29] flex items-center gap-1 px-2.5 py-1.5 bg-gray-50 dark:bg-[#121824] hover:bg-red-50 dark:hover:bg-red-950/30 border border-gray-200 dark:border-gray-700 rounded-lg transition-colors cursor-pointer"
+                    id="btn-show-welcome">
+                    <span class="material-symbols-outlined text-[15px]">help_outline</span>
+                    <span data-i18n="welcome_guide">How It Works</span>
+                </button>
+
+                <!-- SHAREABLE LINK BUTTON IN HEADER -->
+                <button
+                    class="text-xs font-semibold text-[#8e1b29] dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-[#121824] border border-red-200 dark:border-red-900 rounded-lg transition-all cursor-pointer shadow-2xs active:scale-95"
+                    id="btnHeaderShareLink" title="Copy sharable link to this train">
+                    <span class="material-symbols-outlined text-[15px]" id="headerShareIcon">share</span>
+                    <span id="headerShareText" data-i18n="share_app">Share Link</span>
+                </button>
+
+                <!-- ACCESSIBILITY & SETTINGS POPOVER (Single icon button) -->
+                <div class="relative" id="accessibilityMenuContainer">
+                    <button id="accessibilityBtn"
+                        class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-colors flex items-center justify-center shadow-2xs cursor-pointer"
+                        title="Language, Theme & Settings" aria-label="Settings" aria-haspopup="true"
+                        aria-expanded="false">
+                        <span class="material-symbols-outlined text-[20px]">accessibility_new</span>
+                    </button>
+
+                    <!-- Popover Menu -->
+                    <div id="accessibilityDropdown"
+                        class="hidden absolute right-0 mt-2 w-64 bg-white dark:bg-[#181e29] border border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl p-4 z-50 text-xs transition-all">
+                        <!-- Popover Header -->
+                        <div
+                            class="flex items-center justify-between pb-2 mb-3 border-b border-gray-100 dark:border-gray-800">
+                            <span class="font-bold text-[#0f172a] dark:text-white text-xs flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[16px] text-[#8e1b29]">tune</span>
+                                <span data-i18n="accessibility_settings">Display & Language</span>
+                            </span>
+                        </div>
+
+                        <!-- 1. Language Options -->
+                        <div class="mb-3">
+                            <label
+                                class="block text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5"
+                                data-i18n="language">Language</label>
+                            <div class="grid grid-cols-3 gap-1">
+                                <button type="button"
+                                    class="lang-opt px-2 py-1.5 rounded-lg text-center font-medium border text-xs transition-colors bg-white dark:bg-[#121824] border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                                    data-lang="en">
+                                    English
+                                </button>
+                                <button type="button"
+                                    class="lang-opt px-2 py-1.5 rounded-lg text-center font-medium border text-xs transition-colors bg-white dark:bg-[#121824] border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                                    data-lang="hi">
+                                    हिन्दी
+                                </button>
+                                <button type="button"
+                                    class="lang-opt px-2 py-1.5 rounded-lg text-center font-medium border text-xs transition-colors bg-white dark:bg-[#121824] border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                                    data-lang="te">
+                                    తెలుగు
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 2. Theme Options -->
+                        <div class="mb-3">
+                            <label
+                                class="block text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5"
+                                data-i18n="theme_label">Theme</label>
+                            <div class="grid grid-cols-2 gap-1.5">
+                                <button type="button" id="themeOptLight"
+                                    class="theme-opt flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-colors bg-white dark:bg-[#121824] border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                                    data-theme="light">
+                                    <span class="material-symbols-outlined text-[15px]">light_mode</span>
+                                    <span data-i18n="theme_light">Light</span>
+                                </button>
+                                <button type="button" id="themeOptDark"
+                                    class="theme-opt flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-colors bg-white dark:bg-[#121824] border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                                    data-theme="dark">
+                                    <span class="material-symbols-outlined text-[15px]">dark_mode</span>
+                                    <span data-i18n="theme_dark">Dark</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 3. Time Format Options -->
+                        <div>
+                            <label
+                                class="block text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5"
+                                data-i18n="time_format">Time Format</label>
+                            <div class="grid grid-cols-2 gap-1.5">
+                                <button type="button" id="timeFormat24"
+                                    class="time-format-opt px-2 py-1.5 rounded-lg text-center border text-xs font-medium transition-colors bg-white dark:bg-[#121824] border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                                    data-format="24">
+                                    24-Hour
+                                </button>
+                                <button type="button" id="timeFormat12"
+                                    class="time-format-opt px-2 py-1.5 rounded-lg text-center border text-xs font-medium transition-colors bg-white dark:bg-[#121824] border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                                    data-format="12">
+                                    12-Hour
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Header Clock Badge -->
+                <div
+                    class="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-[#121824] border border-gray-200 dark:border-gray-700 rounded-lg font-mono text-xs text-[#334155] dark:text-gray-300">
+                    <span class="text-gray-400 font-medium" id="liveDateStr">Fri, 04 Sep 2026</span>
+                    <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                    <span class="font-bold text-[#0f172a] dark:text-white" id="liveHeaderClock">14:28:15 IST</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="w-full pt-16 flex-1 bg-[#f4f5f7] dark:bg-[#0f131a] overflow-y-auto">
+
+            <!-- Tab 1: Spot Your Train -->
+            <div class="p-6 max-w-7xl mx-auto space-y-6 active" data-tab-content="spot-your-train">
+
+                <!-- Empathetic, User-Friendly Heading -->
+                <div
+                    class="w-full bg-white dark:bg-[#181e29] border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-xs flex flex-col gap-4">
+                    <div>
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-[#8e1b29] dark:text-red-400"
+                            data-i18n="spot_sub">
+                            Live Train Movement & Platform Updates
+                        </span>
+                        <h1 class="text-2xl font-extrabold text-[#0f172a] dark:text-white tracking-tight mt-0.5"
+                            data-i18n="nav_spot">
+                            Spot Your Train
+                        </h1>
+                        <p class="text-xs text-[#64748b] dark:text-gray-400 mt-1" data-i18n="spot_desc">
+                            Track where your train is right now, check expected arrival times, platform numbers, and
+                            delays.
+                        </p>
+                    </div>
+
+                    <!-- Friendly Search Bar -->
+                    <div class="relative w-full">
+                        <div
+                            class="flex items-center bg-[#f8fafc] dark:bg-[#121824] border border-gray-300 dark:border-gray-700 focus-within:border-[#8e1b29] focus-within:ring-2 focus-within:ring-[#8e1b29]/20 rounded-xl p-2 transition-all">
+                            <span class="material-symbols-outlined text-gray-400 text-[22px] ml-2 mr-2.5">search</span>
+                            <input
+                                class="w-full bg-transparent text-[#0f172a] dark:text-white placeholder:text-gray-400 focus:outline-none text-sm font-medium"
+                                id="trainSearchInput"
+                                placeholder="Enter Train No. or Name (e.g. 12841, Coromandel Express)..."
+                                data-i18n-ph="search_placeholder" type="text" value="">
+                            <button id="clearSearchBtn"
+                                class="hidden p-1 mr-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg cursor-pointer transition-colors"
+                                title="Clear search">
+                                <span class="material-symbols-outlined text-[18px]">close</span>
+                            </button>
+                        </div>
+                        <div class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-[#181e29] border border-gray-200 dark:border-gray-800 rounded-xl z-30 shadow-xl overflow-hidden"
+                            id="searchDropdown">
+                            <div
+                                class="px-4 py-2.5 bg-gray-50 dark:bg-[#121824] border-b border-gray-200 dark:border-gray-800 text-[11px] font-semibold text-gray-500 uppercase flex items-center justify-between">
+                                <span id="searchDropdownLabel" data-i18n="registry_matches">Matching Trains</span>
+                                <span
+                                    class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1"><span
+                                        class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span><span
+                                        data-i18n="live_network">Live Network</span></span>
+                            </div>
+                            <div id="searchResultsList"></div>
+                        </div>
+                    </div>
+
+                    <!-- Suggested Trains -->
+                    <div id="suggestedTrainsSection" class="mt-1 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider"
+                                    data-i18n="suggested_label">Popular & Frequent Trains</span>
+                                <span
+                                    class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-400"
+                                    data-i18n="live_gps">Live GPS</span>
+                            </div>
+                            <button onclick="switchTab('train-schedule')"
+                                class="text-xs text-[#8e1b29] dark:text-red-400 font-bold hover:underline cursor-pointer flex items-center gap-1">
+                                <span data-i18n="browse_all_trains">Browse all 8,673 trains</span>
+                                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3" id="suggestedTrainsList">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detail View -->
+                <div id="trainDetailView" class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+                    <!-- Left: Route & Station Timetable (Col 7) -->
+                    <div
+                        class="xl:col-span-7 flex flex-col bg-white dark:bg-[#181e29] border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-xs">
+                        <div
+                            class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-800">
+                            <div id="detailHeader"></div>
+                            <button
+                                class="p-2 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                                onclick="refreshCurrentTrain()" title="Refresh live updates">
+                                <span class="material-symbols-outlined text-sm">refresh</span>
+                            </button>
+                        </div>
+                        <div id="detailTimeline" class="mt-4 flex flex-col relative"></div>
+                    </div>
+
+                    <!-- Right: Journey Telemetry & Friendly Estimates (Col 5) -->
+                    <div class="xl:col-span-5 flex flex-col gap-4">
+                        <div id="detailTelemetry" class="space-y-4"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Train Schedule -->
+            <div class="p-6 max-w-7xl mx-auto space-y-6" data-tab-content="train-schedule">
+                <div
+                    class="bg-white dark:bg-[#181e29] border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-xs">
+                    <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h2 class="text-xl font-bold text-[#0f172a] dark:text-white" data-i18n="nav_schedule">
+                                    Train Schedule & Timetable</h2>
+                                <span
+                                    class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-400"
+                                    data-i18n="live_network">Live Network</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-0.5" id="scheduleDbSub" data-i18n="schedule_sub">Browse
+                                real-time schedules and
+                                running status for 8,673 trains across Indian Railways.</p>
+                        </div>
+                        <div class="relative w-72">
+                            <input
+                                class="w-full bg-gray-50 dark:bg-[#121824] border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-2 text-sm text-[#0f172a] dark:text-white"
+                                id="scheduleSearch" placeholder="Filter by train no or name..."
+                                data-i18n-ph="filter_trains">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="scheduleList"></div>
+                    <div class="mt-6 flex justify-center" id="scheduleLoadMoreContainer">
+                        <button id="btnLoadMoreSchedule"
+                            class="px-6 py-3 bg-white dark:bg-[#181e29] border border-gray-200 dark:border-gray-800 hover:border-[#8e1b29] text-[#0f172a] dark:text-white rounded-xl text-xs font-bold shadow-xs hover:shadow-md transition-all cursor-pointer flex items-center gap-2">
+                            <span class="material-symbols-outlined text-base text-[#8e1b29]">expand_more</span>
+                            <span data-i18n="load_more">Load Next 30 Trains</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Station to Station Search -->
+            <div class="p-6 max-w-4xl mx-auto space-y-6" data-tab-content="station-search">
+                <div
+                    class="bg-white dark:bg-[#181e29] border border-gray-200 dark:border-gray-800 rounded-2xl p-8 shadow-xs">
+                    <h2 class="text-2xl font-bold mb-2 text-center text-[#0f172a] dark:text-white"
+                        data-i18n="find_trains">Find Trains Between Stations</h2>
+                    <p class="text-xs text-gray-500 text-center mb-6" data-i18n="find_sub">Enter your origin and
+                        destination station codes or
+                        names to see available trains.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-11 gap-4 items-center">
+                        <div class="md:col-span-5 relative">
+                            <label class="block text-[11px] font-bold text-gray-500 uppercase mb-1.5"
+                                data-i18n="from_station">From Station</label>
+                            <input
+                                class="w-full border-gray-300 dark:border-gray-700 dark:bg-[#121824] rounded-xl p-3 font-mono text-sm"
+                                id="fromStnInput" placeholder="Origin station (e.g. SHM, NDLS)..."
+                                data-i18n-ph="from_placeholder" autocomplete="off">
+                            <div id="fromStnDropdown" class="autocomplete-dropdown hidden"></div>
+                        </div>
+                        <div class="md:col-span-1 flex justify-center pt-5 text-gray-400">
+                            <span
+                                class="material-symbols-outlined rotate-90 md:rotate-0 text-2xl text-[#8e1b29]">sync_alt</span>
+                        </div>
+                        <div class="md:col-span-5 relative">
+                            <label class="block text-[11px] font-bold text-gray-500 uppercase mb-1.5"
+                                data-i18n="to_station">To Station</label>
+                            <input
+                                class="w-full border-gray-300 dark:border-gray-700 dark:bg-[#121824] rounded-xl p-3 font-mono text-sm"
+                                id="toStnInput" placeholder="Destination station (e.g. MAS, BSB)..."
+                                data-i18n-ph="to_placeholder" autocomplete="off">
+                            <div id="toStnDropdown" class="autocomplete-dropdown hidden"></div>
+                        </div>
+                    </div>
+                    <button
+                        class="w-full mt-6 py-3.5 bg-[#8e1b29] hover:bg-[#771420] text-white font-bold rounded-xl shadow-md active:scale-95 transition-all cursor-pointer text-sm"
+                        id="btnFindTrains" data-i18n="btn_find">Find Trains</button>
+                </div>
+                <div id="stnToStnResults" class="space-y-4"></div>
+            </div>
+
+            <!-- Tab 4: Recently Viewed -->
+            <div class="p-6 max-w-5xl mx-auto space-y-6" data-tab-content="recently-viewed">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-[#0f172a] dark:text-white" data-i18n="nav_recent">Recently
+                            Viewed Trains</h2>
+                        <p class="text-xs text-gray-500 mt-0.5" data-i18n="recent_sub">Quickly access trains you checked
+                            earlier.</p>
+                    </div>
+                    <button class="text-xs text-[#8e1b29] font-bold hover:underline cursor-pointer" id="btnClearHistory"
+                        data-i18n="clear_all">Clear All</button>
+                </div>
+                <div id="recentHistoryList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                <div id="historyEmptyState" class="hidden flex flex-col items-center justify-center py-20 opacity-50">
+                    <span class="material-symbols-outlined text-6xl mb-4 text-gray-400">history_toggle_off</span>
+                    <p class="text-lg font-medium" data-i18n="no_history">No recent activity found.</p>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer
+            class="w-full h-10 bg-white dark:bg-[#181e29] border-t border-gray-200 dark:border-gray-800 px-6 flex items-center justify-between text-[#64748b] dark:text-gray-400 text-xs font-mono select-none transition-colors">
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-1.5"><span class="text-[10px] uppercase font-bold text-gray-400"
+                        data-i18n="latency">UPDATE SPEED:</span><span id="pollLatency">24ms</span></div>
+                <div class="flex items-center gap-1.5"><span class="text-[10px] uppercase font-bold text-gray-400"
+                        data-i18n="stream">GPS RADAR:</span><span class="text-[#8e1b29] font-bold">CONNECTED</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-4 text-[11px] uppercase">
+                <span class="flex items-center gap-1.5"><span
+                        class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span id="supabaseStatus"
+                        data-i18n="live_net_conn">LIVE
+                        NETWORK CONNECTED</span></span>
+                <span class="text-gray-300 dark:text-gray-700">•</span>
+                <span class="flex items-center gap-1.5">JOURNEY V2.9</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- LIVE TELEMETRY MODAL -->
+    <div id="supabaseDiagnosticModal"
+        class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all duration-200">
+        <div
+            class="bg-white dark:bg-[#181e29] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 w-full max-w-lg p-6 mx-4 flex flex-col relative">
+            <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-800">
+                <div class="flex items-center gap-2.5">
+                    <div
+                        class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600">
+                        <span class="material-symbols-outlined text-[20px]">sensors</span>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-[#0f172a] dark:text-white">Live Train Network Telemetry</h3>
+                        <p class="text-[11px] text-gray-500">Real-time satellite & GPS tracking feed</p>
+                    </div>
+                </div>
+                <button id="closeSupabaseModal"
+                    class="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
+                    <span class="material-symbols-outlined text-lg">close</span>
+                </button>
+            </div>
+
+            <div class="mt-4 space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <div
+                        class="p-3 bg-gray-50 dark:bg-[#121824] rounded-xl border border-gray-100 dark:border-gray-800">
+                        <span class="text-[10px] uppercase font-bold text-gray-400 block">Connection Status</span>
+                        <span class="text-xs font-bold text-emerald-600 flex items-center gap-1.5 mt-0.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Active (HTTP 200 OK)
+                        </span>
+                    </div>
+                    <div
+                        class="p-3 bg-gray-50 dark:bg-[#121824] rounded-xl border border-gray-100 dark:border-gray-800">
+                        <span class="text-[10px] uppercase font-bold text-gray-400 block">Active Trains on
+                            Network</span>
+                        <span id="modalTotalTrains"
+                            class="text-xs font-mono font-bold text-[#0f172a] dark:text-white mt-0.5 block">8,673
+                            Trains</span>
+                    </div>
+                </div>
+
+                <div
+                    class="p-3 bg-gray-50 dark:bg-[#121824] rounded-xl border border-gray-100 dark:border-gray-800 text-xs">
+                    <span class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Live Telemetry Gateway</span>
+                    <code
+                        class="text-[11px] font-mono text-[#8e1b29] dark:text-red-300 break-all select-all">wss://telemetry-gateway.rail-network.live • Encrypted Live Feed (24ms)</code>
+                </div>
+
+                <div class="p-3 bg-gray-50 dark:bg-[#121824] rounded-xl border border-gray-100 dark:border-gray-800">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[10px] uppercase font-bold text-gray-400">Live Fleet Telemetry Sample</span>
+                        <button id="btnRunTestQuery"
+                            class="px-2.5 py-1 bg-[#8e1b29] hover:bg-[#771420] text-white rounded-lg text-[10px] font-bold cursor-pointer transition-colors flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[12px]">refresh</span>
+                            <span>Test Feed</span>
+                        </button>
+                    </div>
+                    <pre id="modalQueryOutput"
+                        class="p-2.5 bg-black/90 text-emerald-400 font-mono text-[10px] rounded-lg overflow-x-auto max-h-44 select-all">Loading live fleet tracking feed...</pre>
+                </div>
+            </div>
+
+            <div class="mt-5 flex justify-end">
+                <button id="btnCloseSupabaseModalBottom"
+                    class="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-xs font-semibold rounded-xl text-gray-700 dark:text-gray-200 transition-colors cursor-pointer">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SHARE LIVE JOURNEY MODAL -->
+    <div id="share-modal-overlay" class="hidden fixed inset-0 z-[130] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all">
+        <div class="bg-white dark:bg-[#181e29] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 w-full max-w-md p-6 relative animate-in fade-in zoom-in-95">
+            <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-800">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-[#8e1b29]/10 dark:bg-[#8e1b29]/20 flex items-center justify-center text-[#8e1b29] dark:text-[#ff8a99]">
+                        <span class="material-symbols-outlined text-[20px]">share</span>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-[#0f172a] dark:text-white" data-i18n="share_modal_title">Share Live Journey</h3>
+                        <p class="text-[11px] text-gray-500" data-i18n="share_modal_subtitle">Public link to track this train in real-time</p>
+                    </div>
+                </div>
+                <button id="btnCloseShareModal" class="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors">
+                    <span class="material-symbols-outlined text-lg">close</span>
+                </button>
+            </div>
+
+            <div class="mt-4 space-y-4">
+                <!-- Current Train Card -->
+                <div class="p-3 bg-gray-50 dark:bg-[#121824] rounded-xl border border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <span class="material-symbols-outlined text-[#8e1b29] text-[20px] shrink-0">directions_subway</span>
+                        <div class="min-w-0">
+                            <span class="text-[10px] uppercase font-bold text-gray-400 block tracking-wider" data-i18n="currently_tracking">Tracking Train</span>
+                            <span id="shareModalTrainName" class="text-xs font-bold text-[#0f172a] dark:text-white truncate block">12841 - COROMANDEL EXPRESS</span>
+                        </div>
+                    </div>
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 shrink-0">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live
+                    </span>
+                </div>
+
+                <!-- Shareable Link Field -->
+                <div>
+                    <label class="block text-[11px] font-semibold text-gray-600 dark:text-gray-300 mb-1.5" data-i18n="share_public_url_label">Shareable Link</label>
+                    <div class="flex items-center gap-2">
+                        <div class="relative flex-1">
+                            <input id="shareModalUrlInput" type="text" readonly class="w-full pl-8 pr-2.5 py-2 text-xs font-mono bg-gray-100 dark:bg-[#121824] text-gray-800 dark:text-gray-200 rounded-xl border border-gray-200 dark:border-gray-700 select-all focus:outline-none focus:ring-2 focus:ring-[#8e1b29]/20" />
+                            <span class="material-symbols-outlined absolute left-2.5 top-2 text-[16px] text-gray-400">link</span>
+                        </div>
+                        <button id="btnModalCopyLink" class="px-3.5 py-2 bg-[#8e1b29] hover:bg-[#771420] text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 cursor-pointer shadow-sm active:scale-95">
+                            <span class="material-symbols-outlined text-[15px]" id="modalCopyIcon">content_copy</span>
+                            <span id="modalCopyText" data-i18n="copy">Copy</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- WhatsApp Share Button -->
+                <button id="btnModalShareWhatsApp" class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98">
+                    <span class="material-symbols-outlined text-[17px]">send</span>
+                    <span data-i18n="btn_share">Share Live Status on WhatsApp</span>
+                </button>
+
+                <!-- Quick Share Suggestions for Other Trains -->
+                <div>
+                    <span class="text-[10px] uppercase font-bold text-gray-400 block mb-2 tracking-wider" data-i18n="popular_train_links">Quick Train Links</span>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <button class="btn-quick-train text-left p-2 rounded-lg border border-gray-100 dark:border-gray-800 bg-gray-50/70 dark:bg-[#121824] hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center justify-between cursor-pointer" data-train="12841">
+                            <span class="font-medium text-gray-700 dark:text-gray-200 text-[11px] truncate">12841 Coromandel</span>
+                            <span class="material-symbols-outlined text-gray-400 text-[13px]">content_copy</span>
+                        </button>
+                        <button class="btn-quick-train text-left p-2 rounded-lg border border-gray-100 dark:border-gray-800 bg-gray-50/70 dark:bg-[#121824] hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center justify-between cursor-pointer" data-train="12951">
+                            <span class="font-medium text-gray-700 dark:text-gray-200 text-[11px] truncate">12951 Rajdhani</span>
+                            <span class="material-symbols-outlined text-gray-400 text-[13px]">content_copy</span>
+                        </button>
+                        <button class="btn-quick-train text-left p-2 rounded-lg border border-gray-100 dark:border-gray-800 bg-gray-50/70 dark:bg-[#121824] hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center justify-between cursor-pointer" data-train="12301">
+                            <span class="font-medium text-gray-700 dark:text-gray-200 text-[11px] truncate">12301 Howrah Exp</span>
+                            <span class="material-symbols-outlined text-gray-400 text-[13px]">content_copy</span>
+                        </button>
+                        <button class="btn-quick-train text-left p-2 rounded-lg border border-gray-100 dark:border-gray-800 bg-gray-50/70 dark:bg-[#121824] hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center justify-between cursor-pointer" data-train="20901">
+                            <span class="font-medium text-gray-700 dark:text-gray-200 text-[11px] truncate">20901 Vande Bharat</span>
+                            <span class="material-symbols-outlined text-gray-400 text-[13px]">content_copy</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="env.js"></script>
+    <script src="supabase.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>

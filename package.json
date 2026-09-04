@@ -1,0 +1,15 @@
+{
+  "name": "journey-app",
+  "version": "1.0.0",
+  "description": "Passenger-friendly intelligent train tracking dashboard",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "test-supabase": "node -e \"const { createClient } = require('@supabase/supabase-js'); process.loadEnvFile('.env.local'); const s = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY); s.from('live_trains').select('train_no,train_name,speed_kmph,signal,adjusted_delay').limit(3).then(({data, error}) => console.log(JSON.stringify({data, error}, null, 2)));\""
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.5",
+    "@supabase/supabase-js": "^2.115.0"
+  }
+}

@@ -1,0 +1,239 @@
+/* 
+ * JOURNEY - Railway Styling System
+ * Authentic Railway Burgundy Palette: #8e1b29, #5a121a, #fdf2f3
+ * Guarantees visual rendering independent of external CSS engines
+ */
+
+:root {
+    /* Brand Burgundy Palette */
+    --railway-red: #8e1b29;
+    --railway-red-hover: #771420;
+    --railway-maroon-dark: #5a121a;
+    --railway-tint: #fdf2f3;
+    --railway-tint-border: #fecdd3;
+    
+    /* Neutral & Canvas */
+    --canvas-bg: #f4f5f7;
+    --surface-card: #ffffff;
+    --surface-subtle: #f8fafc;
+    --border-color: #e2e8f0;
+    --border-subtle: #f1f5f9;
+    
+    /* Text Hierarchy */
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --text-light: #94a3b8;
+    
+    /* Status Colors */
+    --status-ontime-bg: #ecfdf5;
+    --status-ontime-text: #15803d;
+    --status-ontime-border: #bbf7d0;
+    --status-delay-bg: #fff7ed;
+    --status-delay-text: #c2410c;
+    --status-delay-border: #fed7aa;
+}
+
+.dark {
+    --railway-red: #b91c1c;
+    --railway-red-hover: #991b1b;
+    --railway-maroon-dark: #3f0d14;
+    --railway-tint: #2a1114;
+    --railway-tint-border: #4c1d24;
+    
+    --canvas-bg: #0f131a;
+    --surface-card: #181e29;
+    --surface-subtle: #1e2533;
+    --border-color: #2b3548;
+    --border-subtle: #222a3a;
+    
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --text-light: #64748b;
+}
+
+html, body { 
+    margin: 0; 
+    padding: 0; 
+    background-color: var(--canvas-bg);
+    color: var(--text-main);
+    transition: background-color 0.2s ease, color 0.2s ease; 
+}
+body { overscroll-behavior: none; }
+
+/* Tab Content Visibility */
+[data-tab-content] { display: none !important; }
+[data-tab-content].active { display: block !important; }
+
+.hide-welcome-initially #welcome-overlay { display: none; }
+#welcome-overlay.hidden { display: none !important; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+.dark ::-webkit-scrollbar-thumb { background: #475569; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* ==========================================================================
+   EXPLICIT BURGUNDY & MAROON BRAND UTILITIES (NEVER DEPENDENT ON TAILWIND JIT)
+   ========================================================================== */
+
+/* Primary Burgundy Backgrounds */
+.bg-primary,
+.bg-railway-red,
+.bg-\[\#8e1b29\],
+[class*="bg-[#8e1b29]"] {
+    background-color: #8e1b29 !important;
+}
+
+.hover\:bg-\[\#771420\]:hover,
+[class*="hover:bg-[#771420]"]:hover {
+    background-color: #771420 !important;
+}
+
+/* Deep Maroon Card Background */
+.bg-railway-maroon,
+.bg-\[\#5a121a\],
+[class*="bg-[#5a121a]"] {
+    background-color: #5a121a !important;
+}
+
+/* Soft Warm Rose Tint Background (Current Station Highlight) */
+.bg-railway-tint,
+.bg-\[\#fdf2f3\],
+[class*="bg-[#fdf2f3]"] {
+    background-color: #fdf2f3 !important;
+}
+.dark .bg-\[\#fdf2f3\],
+.dark [class*="bg-[#fdf2f3]"] {
+    background-color: rgba(90, 18, 26, 0.35) !important;
+}
+
+/* Brand Burgundy Texts */
+.text-primary,
+.text-railway-red,
+.text-\[\#8e1b29\],
+[class*="text-[#8e1b29]"] {
+    color: #8e1b29 !important;
+}
+.dark .text-\[\#8e1b29\],
+.dark [class*="text-[#8e1b29]"] {
+    color: #f87171 !important;
+}
+
+/* Brand Burgundy Borders */
+.border-primary,
+.border-railway-red,
+.border-\[\#8e1b29\],
+[class*="border-[#8e1b29]"] {
+    border-color: #8e1b29 !important;
+}
+.dark .border-\[\#8e1b29\],
+.dark [class*="border-[#8e1b29]"] {
+    border-color: #991b1b !important;
+}
+
+.border-railway-tint,
+[class*="border-red-200"] {
+    border-color: #fecdd3 !important;
+}
+.dark [class*="border-red-200"] {
+    border-color: #5a121a !important;
+}
+
+/* Sidebar Active Navigation Capsule */
+.nav-link {
+    color: #475569;
+    font-weight: 500;
+    position: relative;
+    transition: all 0.15s ease;
+}
+.dark .nav-link {
+    color: #94a3b8;
+}
+.nav-link:hover {
+    background-color: #f1f5f9;
+    color: #0f172a;
+}
+.dark .nav-link:hover {
+    background-color: #1e2533;
+    color: #ffffff;
+}
+.nav-link.active {
+    background-color: #8e1b29 !important;
+    color: #ffffff !important;
+    border-radius: 0.5rem;
+    font-weight: 600;
+}
+.dark .nav-link.active {
+    background-color: #8e1b29 !important;
+    color: #ffffff !important;
+}
+.nav-link.active .material-symbols-outlined {
+    color: #ffffff !important;
+}
+.nav-link.active::after {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    margin-left: auto;
+}
+
+/* Station Route Timeline Elements */
+.timeline-stem {
+    position: absolute;
+    left: 21px;
+    top: 24px;
+    bottom: 0;
+    width: 2px;
+    background: #cbd5e1;
+    z-index: 1;
+}
+.dark .timeline-stem {
+    background: #334155;
+}
+
+/* Badges */
+.badge-ontime {
+    background-color: var(--status-ontime-bg);
+    color: var(--status-ontime-text);
+    border: 1px solid var(--status-ontime-border);
+}
+.badge-delay {
+    background-color: var(--status-delay-bg);
+    color: var(--status-delay-text);
+    border: 1px solid var(--status-delay-border);
+}
+
+.autocomplete-dropdown {
+    position: absolute; 
+    top: 100%; 
+    left: 0; 
+    right: 0; 
+    background: white; 
+    border: 1px solid var(--border-color); 
+    border-radius: 0.5rem;
+    z-index: 50; 
+    max-height: 220px; 
+    overflow-y: auto; 
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+}
+.dark .autocomplete-dropdown { 
+    background: var(--surface-card); 
+    border-color: var(--border-color); 
+}
+
+/* Accessibility menu active buttons */
+.accessibility-opt-btn.active {
+    background-color: #fdf2f3 !important;
+    color: #8e1b29 !important;
+    border-color: #8e1b29 !important;
+    font-weight: 700;
+}
+.dark .accessibility-opt-btn.active {
+    background-color: rgba(90, 18, 26, 0.4) !important;
+    color: #fca5a5 !important;
+    border-color: #b91c1c !important;
+    font-weight: 700;
+}
