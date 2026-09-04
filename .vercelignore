@@ -1,0 +1,3 @@
+# Exclude local development server so Vercel serves static files and /api without capturing server.js
+server.js
+.env.local

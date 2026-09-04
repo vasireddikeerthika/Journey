@@ -2,7 +2,6 @@
   "name": "journey-app",
   "version": "1.0.0",
   "description": "Passenger-friendly intelligent train tracking dashboard",
-  "main": "server.js",
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
