@@ -44,7 +44,7 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon'
 };
 
-const server = http.createServer((req, res) => {
+const handleRequest = (req, res) => {
   const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost:3000'}`);
   let pathname = parsedUrl.pathname;
 
@@ -55,7 +55,7 @@ window.process = window.process || { env: {} };
 window.process.env = window.process.env || {};
 window.process.env.NEXT_PUBLIC_SUPABASE_URL = ${JSON.stringify(process.env.NEXT_PUBLIC_SUPABASE_URL || '')};
 window.process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = ${JSON.stringify(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '')};
-window.PUBLIC_TUNNEL_URL = ${JSON.stringify(process.env.PUBLIC_TUNNEL_URL || 'https://gave-eventually-inclusive-manufacturer.trycloudflare.com')};
+window.PUBLIC_TUNNEL_URL = ${JSON.stringify(process.env.PUBLIC_TUNNEL_URL || '')};
 window.ENV = window.process.env;
 console.log(
   \`[env.js] Runtime environment variables injected:\\n\` +
@@ -103,21 +103,28 @@ console.log(
     res.writeHead(200, { 'Content-Type': contentType });
     res.end(data);
   });
-});
+};
 
-const PORT = process.env.PORT || 3000;
+const server = http.createServer(handleRequest);
 
-server.on('error', (err) => {
-  if (err.code === 'EADDRINUSE') {
-    console.log(`[Dev Server] Port ${PORT} is already in use by another instance.`);
-    console.log(`[Dev Server] Journey Dashboard is active and accessible at http://localhost:${PORT}`);
-    process.exit(0);
-  } else {
-    console.error('[Dev Server] Server error:', err);
-    process.exit(1);
-  }
-});
+// Only listen locally if not in Vercel serverless environment
+if (require.main === module && !process.env.VERCEL) {
+  const PORT = process.env.PORT || 3000;
 
-server.listen(PORT, () => {
-  console.log(`[Dev Server] Journey Dashboard running at http://localhost:${PORT}`);
-});
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.log(`[Dev Server] Port ${PORT} is already in use by another instance.`);
+      console.log(`[Dev Server] Journey Dashboard is active and accessible at http://localhost:${PORT}`);
+      process.exit(0);
+    } else {
+      console.error('[Dev Server] Server error:', err);
+      process.exit(1);
+    }
+  });
+
+  server.listen(PORT, () => {
+    console.log(`[Dev Server] Journey Dashboard running at http://localhost:${PORT}`);
+  });
+}
+
+module.exports = handleRequest;

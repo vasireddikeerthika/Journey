@@ -20,7 +20,7 @@ dist/
 .env.test.local
 .env.production.local
 .env.*.local
-env.js
+/env.js
 
 # Operating System & IDE Files
 .DS_Store
